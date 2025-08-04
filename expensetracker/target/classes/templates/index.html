@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Expense Tracker</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #333;
+            --card-bg: #f3f0ff;
+            --primary: #5a55a1;
+            --hover: #4a4484;
+            --table-head: #5a55a1;
+            --table-row: #f9f9ff;
+        }
+
+        body.dark {
+            --bg: #1e1e2f;
+            --text: #e0e0e0;
+            --card-bg: #2c2c3f;
+            --primary: #9a97d4;
+            --hover: #6c68aa;
+            --table-head: #3a3860;
+            --table-row: #2c2c3f;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 40px;
+            background-color: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+        }
+
+        .header {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .summary-box {
+            background-color: var(--bg);
+            border-left: 6px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-radius: 8px;
+            color: var(--text);
+        }
+
+        input[type="text"] {
+
+            padding: 10px;
+            width: 300px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 5px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--hover);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: var(--bg);
+            color: var(--text);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background-color: var(--table-head);
+            color: #fff;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--table-row);
+        }
+
+        tr:hover {
+            background-color: rgba(90, 85, 161, 0.1);
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .actions a {
+            margin: 0 10px;
+        }
+
+        .top-right {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+         .top-right .btn {
+               background-color: var(--primary);
+               color: white;
+               padding: 8px 12px;
+               border-radius: 5px;
+               cursor: pointer;
+               transition: background-color 0.2s;
+         }
+
+         .top-right .btn:hover {
+               background-color: var(--hover);
+         }
+
+         @media (max-width: 600px) {
+               body {
+                  margin: 20px;
+               }
+
+               .container {
+                  padding: 20px;
+               }
+
+               input[type="text"] {
+                  width: 100%;
+                  margin-bottom: 10px;
+               }
+
+               .btn {
+                  width: 100%;
+                  margin: 5px 0;
+               }
+
+               table, th, td {
+                  font-size: 14px;
+               }
+            }
+            .search-container {
+                  display: flex;
+                  justify-content: center;  /* Center horizontally */
+                  align-items: center;      /* Center vertically if needed */
+                  gap: 10px;                /* Space between input and button */
+                  margin-bottom: 10px;
+               }
+
+            @media (max-width: 600px) {
+                  .search-container {
+                     flex-direction: column;
+                  }
+                  .search-container input[type="text"],
+                  .search-container button {
+                     width: 100%;
+                     margin: 5px 0;
+                  }
+               }
+
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="top-right">
+        <button class="btn" onclick="toggleDarkMode()">🌗 Toggle Dark Mode</button>
+    </div>
+
+    <h1 class="header">Expense Tracker</h1>
+
+    <div class="summary-box">
+        <strong>Total Expense:</strong> ₹<span th:text="${total}"></span>
+    </div>
+
+    <form method="get" action="/search" id="searchForm">
+        <div class="search-container">
+            <input type="text" name="keyword" placeholder="Search by description or category"/>
+            <button type="submit" class="btn">Search</button>
+        </div>
+    </form>
+
+
+    <br/>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Description</th>
+            <th>Amount (₹)</th>
+            <th>Category</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="expense : ${expenses}">
+            <td th:text="${expense.description}"></td>
+            <td th:text="${expense.amount}"></td>
+            <td th:text="${expense.category}"></td>
+            <td th:text="${expense.date}"></td>
+            <td>
+                <a th:href="@{/edit/{id}(id=${expense.id})}" class="btn">Edit</a>
+                <a th:href="@{/delete/{id}(id=${expense.id})}" class="btn"
+                   onclick="return confirm('Are you sure you want to delete this?')">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="actions">
+        <div class="actions">
+            <a th:href="@{/add}" class="btn">+ Add Expense</a>
+            <a th:href="@{/dashboard}" class="btn">📊 View Dashboard</a>
+            <a href="/export/csv" class="btn">⬇ Export CSV</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function toggleDarkMode() {
+        document.body.classList.toggle("dark");
+    }
+</script>
+</body>
+</html>

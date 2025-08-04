@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #333;
+            --card-bg: #f3f0ff;
+            --primary: #5a55a1;
+            --hover: #4a4484;
+        }
+
+        body.dark {
+            --bg: #1e1e2f;
+            --text: #e0e0e0;
+            --card-bg: #2c2c3f;
+            --primary: #9a97d4;
+            --hover: #6c68aa;
+        }
+
+        h2, h4, h5 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            display: inline-block;
+            text-align: center;
+            transition: background 0.3s;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: var(--hover);
+        }
+
+        .chart-container {
+            margin-top: 30px;
+        }
+
+        .top-right {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="top-right">
+        <button class="btn" onclick="toggleDarkMode()">🌗 Toggle Dark Mode</button>
+    </div>
+
+    <h2>Expense Dashboard</h2>
+
+    <div class="card">
+        <h4>Total Spent: ₹ <span th:text="${total}">0.0</span></h4>
+    </div>
+
+    <div class="stats">
+        <div class="card">
+            <h5>Most Recent</h5>
+            <p th:text="${mostRecent.description + ' - ₹' + mostRecent.amount + ' on ' + mostRecent.date}">None</p>
+        </div>
+        <div class="card">
+            <h5>Highest Expense</h5>
+            <p th:text="${highest.description + ' - ₹' + highest.amount}">None</p>
+        </div>
+        <div class="card">
+            <h5>Most Frequent Category</h5>
+            <p th:text="${mostFrequentCategory}">None</p>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h4>Category Breakdown</h4>
+        <canvas id="categoryChart" height="180"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h4>Monthly Totals</h4>
+        <canvas id="monthlyChart" height="180"></canvas>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="/" class="btn">← Back to Home</a>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const categoryData = [[${categoryTotals}]];
+    const categoryLabels = Object.keys(categoryData);
+    const categoryValues = Object.values(categoryData);
+
+    const categoryChart = new Chart(document.getElementById('categoryChart'), {
+        type: 'pie',
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                data: categoryValues,
+                backgroundColor: ['#a18cd1', '#fbc2eb', '#84fab0', '#8fd3f4', '#c3cfe2'],
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'bottom', labels: { color: getComputedStyle(document.body).getPropertyValue('--text') } }
+            }
+        }
+    });
+
+    const monthlyData = [[${monthlyTotals}]];
+    const monthLabels = Object.keys(monthlyData);
+    const monthValues = Object.values(monthlyData);
+
+    const monthlyChart = new Chart(document.getElementById('monthlyChart'), {
+        type: 'bar',
+        data: {
+            labels: monthLabels,
+            datasets: [{
+                label: 'Monthly Expenses (₹)',
+                data: monthValues,
+                backgroundColor: '#a18cd1',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: getComputedStyle(document.body).getPropertyValue('--text') }
+                },
+                x: {
+                    ticks: { color: getComputedStyle(document.body).getPropertyValue('--text') }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    function toggleDarkMode() {
+        document.body.classList.toggle("dark");
+        // Reload chart colors if necessary
+        categoryChart.options.plugins.legend.labels.color = getComputedStyle(document.body).getPropertyValue('--text');
+        categoryChart.update();
+        monthlyChart.options.scales.x.ticks.color = getComputedStyle(document.body).getPropertyValue('--text');
+        monthlyChart.options.scales.y.ticks.color = getComputedStyle(document.body).getPropertyValue('--text');
+        monthlyChart.update();
+    }
+</script>
+</body>
+</html>

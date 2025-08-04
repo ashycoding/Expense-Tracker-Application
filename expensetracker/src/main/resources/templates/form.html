@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add/Edit Expense</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #333;
+            --card-bg: #f3f0ff;
+            --primary: #5a55a1;
+            --hover: #4a4484;
+            --input-bg: #fff;
+        }
+
+        body.dark {
+            --bg: #1e1e2f;
+            --text: #e0e0e0;
+            --card-bg: #2c2c3f;
+            --primary: #9a97d4;
+            --hover: #6c68aa;
+            --input-bg: #3c3c4f;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 40px;
+            background-color: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+        }
+
+        .header {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: var(--input-bg);
+            color: var(--text);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--hover);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .top-right {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="top-right">
+        <button class="btn" onclick="toggleDarkMode()">🌗 Toggle Dark Mode</button>
+    </div>
+
+    <h2 class="header">Add / Edit Expense</h2>
+
+    <form th:action="@{/save}" th:object="${expense}" method="post">
+        <input type="hidden" th:field="*{id}"/>
+
+        <label>Description:</label>
+        <input type="text" th:field="*{description}" required/>
+
+        <label>Amount:</label>
+        <input type="number" step="0.01" th:field="*{amount}" required/>
+
+        <label>Category:</label>
+        <select th:field="*{category}" required>
+            <option value="" disabled selected>Select Category</option>
+            <option value="Food">Food</option>
+            <option value="Travel">Travel</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Others">Others</option>
+        </select>
+
+        <label>Date:</label>
+        <input type="date" th:field="*{date}" required/>
+
+        <div class="actions">
+            <button type="submit" class="btn">Save</button>
+            <a th:href="@{/}" class="btn">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    function toggleDarkMode() {
+        document.body.classList.toggle("dark");
+    }
+</script>
+</body>
+</html>
